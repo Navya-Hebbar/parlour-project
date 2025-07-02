@@ -1,4 +1,4 @@
-# Parlour Admin Dashboard
+# Parlour Admin Dashboard with Role-Based Access & Live Attendance
 
 A full-stack web-based dashboard system for a parlour business, featuring role-based access control, employee/task management, and real-time attendance updates via WebSockets.
 
