@@ -4,7 +4,7 @@ A full-stack web-based dashboard system for a parlour business, featuring role-b
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 - **Frontend:** Next.js 15 (App Router) + TypeScript + TailwindCSS + ShadCN UI
 - **Backend:** Node.js + TypeScript (MVC) + Express + MongoDB + Socket.IO
 - **Auth:** JWT-based authentication
@@ -12,7 +12,7 @@ A full-stack web-based dashboard system for a parlour business, featuring role-b
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```
 /parlour-project
 ├── frontend-parlour-dashboard   # Next.js 15 + TypeScript + Tailwind + ShadCN
@@ -21,7 +21,7 @@ A full-stack web-based dashboard system for a parlour business, featuring role-b
 
 ---
 
-## 🛠Setup & Configuration Instructions
+## Setup & Configuration Instructions
 
 ### 1. **Clone the Repo**
 ```sh
