@@ -13,11 +13,11 @@ export const login = async (req: Request, res: Response) => {
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' })
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET!, {
+    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET!, {
       expiresIn: '2h',
     })
 
-    res.json({ token, user: { role: user.role } })
+    res.json({ token, user: { role: user.role, email: user.email, name: user.name } })
   } catch (error) {
     res.status(500).json({ message: 'Server error' })
   }

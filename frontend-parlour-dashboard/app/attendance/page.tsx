@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaRegClock, FaCheckCircle } from 'react-icons/fa'
 import Lottie from 'lottie-react'
+import axios from 'axios'
+import io from 'socket.io-client'
 
 // ✅ Mocked employee list
 const mockEmployees = [
@@ -12,6 +14,9 @@ const mockEmployees = [
   { id: 'e003', name: 'Ravi Kumar' },
   { id: 'e004', name: 'Simran Kaur' },
 ]
+
+
+const socket = io('http://localhost:5000')
 
 export default function AttendancePage() {
   const [currentTime, setCurrentTime] = useState('')
@@ -38,19 +43,49 @@ export default function AttendancePage() {
       .then(setClockAnim)
   }, [])
 
-  const handlePunch = (empId: string, empName: string) => {
+  // Listen for real-time punch updates
+  useEffect(() => {
+    socket.on('attendance_update', (data: { userId: string; name: string; action: string; time: string }) => {
+      setPunchLogs((prev) => [
+        {
+          id: data.userId || '',
+          name: data.name || '',
+          type: data.action === 'in' ? 'in' : 'out',
+          time: new Date(data.time).toLocaleTimeString(),
+        },
+        ...prev,
+      ])
+    })
+    return () => {
+      socket.off('attendance_update')
+    }
+  }, [])
+
+  const handlePunch = async (empId: string, empName: string) => {
     const isIn = punchState[empId]
     setPunchState({ ...punchState, [empId]: !isIn })
-
-    const now = new Date().toLocaleTimeString()
     const type = !isIn ? 'in' : 'out'
-
-    setPunchLogs((prev) => [
-      ...prev,
-      { id: empId, name: empName, type, time: now },
-    ])
-
-    console.log(`🛰️ ${empName} - Punch ${type.toUpperCase()} at ${now}`)
+    try {
+      // Send punch to backend
+      const punchData = {
+        userId: empId,
+        name: empName,
+        action: type,
+        time: new Date().toISOString(),
+      }
+      await axios.post('http://localhost:5000/api/employees/punch', punchData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+    } catch (err) {
+      // fallback: update log locally if backend fails
+      const now = new Date().toLocaleTimeString()
+      setPunchLogs((prev) => [
+        { id: empId, name: empName, type, time: now },
+        ...prev,
+      ])
+    }
   }
 
   return (

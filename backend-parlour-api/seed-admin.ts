@@ -15,13 +15,15 @@ const seed = async () => {
 
     await User.create([
       {
-        email: 'admin@parlour.com',
-        password: hashed,
+        name: 'Flytech Admin',
+        email: 'flytech.admin@parlour.com',
+        password: await bcrypt.hash('Flytech@2025!', 10),
         role: 'superadmin',
       },
       {
-        email: 'staff@parlour.com',
-        password: hashed,
+        name: 'Megha Employee',
+        email: 'employee.megha@parlour.com',
+        password: await bcrypt.hash('Megha#321$', 10),
         role: 'admin',
       },
     ])
@@ -34,4 +36,19 @@ const seed = async () => {
   mongoose.disconnect()
 }
 
-seed()
+seed();
+
+import { Request, Response } from 'express';
+
+export const punchInOut = async (req: Request & { user?: { id?: string } }, res: Response) => {
+  // ... your punch logic ...
+  const attendanceData = { userId: req.user?.id, action: 'punch_in', time: new Date() };
+
+  // Check if io is available in req.app (assuming you attached it in your server setup)
+  const io = req.app?.get('io');
+  if (io) {
+    io.emit('attendance_update', attendanceData); // Broadcast to all clients
+  }
+
+  res.json({ success: true });
+}

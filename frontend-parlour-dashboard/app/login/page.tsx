@@ -25,17 +25,22 @@ export default function LoginPage() {
       const token = res.data.token
       const role = res.data.user.role
       const userEmail = res.data.user.email
+      const userName = res.data.user.name
 
       localStorage.setItem('token', token)
       localStorage.setItem('userEmail', userEmail)
+      localStorage.setItem('userName', userName)
+      localStorage.setItem('role', role)
 
-      // Force reload to update sidebar state
+      // Debug log
+      console.log('Logged in as:', role, userEmail, userName)
+
       if (role === 'superadmin') {
         router.push('/dashboard/employees')
       } else {
         router.push('/attendance')
       }
-      window.location.reload();
+      // window.location.reload(); // Removed to allow redirect
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed')
     }
