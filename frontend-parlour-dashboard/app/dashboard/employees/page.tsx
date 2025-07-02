@@ -37,7 +37,7 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-6">
+    <div className="text-white p-6">
       <h1 className="text-4xl font-bold text-[#00ff99] mb-10 drop-shadow-[0_0_10px_#00ff99] text-center">
         Employee Management
       </h1>

@@ -1,3 +1,4 @@
+'use client'
 import express from 'express'
 import {
   getEmployees,
