@@ -4,28 +4,28 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaRegClock, FaCheckCircle } from 'react-icons/fa'
 import Lottie from 'lottie-react'
-import axios from 'axios'
 import io from 'socket.io-client'
-
-// ✅ Mocked employee list
-const mockEmployees = [
-  { id: 'e001', name: 'Aditi Sharma' },
-  { id: 'e002', name: 'Navya Hebbar' },
-  { id: 'e003', name: 'Ravi Kumar' },
-  { id: 'e004', name: 'Simran Kaur' },
-]
-
-
-const socket = io('http://localhost:5000')
+import axios from 'axios'
 
 export default function AttendancePage() {
+  const [employees, setEmployees] = useState<any[]>([])
   const [currentTime, setCurrentTime] = useState('')
   const [clockAnim, setClockAnim] = useState<any>(null)
-
   const [punchState, setPunchState] = useState<{ [id: string]: boolean }>({})
   const [punchLogs, setPunchLogs] = useState<
     { id: string; name: string; type: 'in' | 'out'; time: string }[]
   >([])
+
+  // Fetch employees from backend
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const res = await axios.get('http://localhost:5000/api/employees', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      })
+      setEmployees(res.data)
+    }
+    fetchEmployees()
+  }, [])
 
   // ⏱ Live digital clock
   useEffect(() => {
@@ -45,6 +45,7 @@ export default function AttendancePage() {
 
   // Listen for real-time punch updates
   useEffect(() => {
+    const socket = io('http://localhost:5000')
     socket.on('attendance_update', (data: { userId: string; name: string; action: string; time: string }) => {
       setPunchLogs((prev) => [
         {
@@ -67,13 +68,11 @@ export default function AttendancePage() {
     const type = !isIn ? 'in' : 'out'
     try {
       // Send punch to backend
-      const punchData = {
-        userId: empId,
-        name: empName,
+      await axios.post('http://localhost:5000/api/employees/punch', {
         action: type,
-        time: new Date().toISOString(),
-      }
-      await axios.post('http://localhost:5000/api/employees/punch', punchData, {
+        empId,
+        empName,
+      }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -107,11 +106,11 @@ export default function AttendancePage() {
 
       {/* 👤 Employee Cards */}
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto mb-16">
-        {mockEmployees.map((emp) => {
-          const isIn = punchState[emp.id]
+        {employees.map((emp) => {
+          const isIn = punchState[emp._id]
           return (
             <motion.div
-              key={emp.id}
+              key={emp._id}
               whileHover={{ scale: 1.02 }}
               className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 shadow-[0_0_20px_#00ff99] flex flex-col items-center justify-between gap-4"
             >
@@ -127,7 +126,7 @@ export default function AttendancePage() {
               </div>
 
               <button
-                onClick={() => handlePunch(emp.id, emp.name)}
+                onClick={() => handlePunch(emp._id, emp.name)}
                 className={`w-full py-2 rounded-full font-semibold text-sm transition-all duration-300 ${
                   isIn
                     ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_15px_#f87171]'
